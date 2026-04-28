@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-APP_NAME="MiSTerContentManager"
+APP_NAME="mister-manager"
 INSTALL_DIR="/opt/$APP_NAME"
 REPO_URL="https://github.com/Jodels2002/MiSTerContentManager.git"  
 CONFIG_FILE="$INSTALL_DIR/app/config.py"
