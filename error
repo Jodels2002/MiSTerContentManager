@@ -1,5 +1,4 @@
-pi@KickPi-Desktop:~/MiSTerContentManager$ mister-manager
-INFO:     Started server process [3894]
+INFO:     Started server process [3994]
 INFO:     Waiting for application startup.
 ERROR:    Traceback (most recent call last):
   File "/opt/mister-manager/venv/lib/python3.13/site-packages/starlette/routing.py", line 638, in lifespan
@@ -10,20 +9,23 @@ ERROR:    Traceback (most recent call last):
   File "/opt/mister-manager/venv/lib/python3.13/site-packages/fastapi/routing.py", line 4886, in _startup
     handler()
     ~~~~~~~^^
-  File "/opt/mister-manager/app/main.py", line 22, in startup
-    init_db()
-    ~~~~~~~^^
-  File "/opt/mister-manager/app/database.py", line 8, in init_db
-    cur.execute("""
-    ~~~~~~~~~~~^^^^
-    CREATE TABLE IF NOT EXISTS games (
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ...<6 lines>...
-    )
-    ^
-    """)
-    ^^^^
-sqlite3.OperationalError: attempt to write a readonly database
+  File "/opt/mister-manager/app/main.py", line 23, in startup
+    load_dats()
+    ~~~~~~~~~^^
+  File "/opt/mister-manager/app/main.py", line 18, in load_dats
+    databases[system] = parse_dat(os.path.join(DAT_PATH, file))
+                        ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/mister-manager/app/dat_parser.py", line 4, in parse_dat
+    tree = etree.parse(dat_path)
+  File "src/lxml/etree.pyx", line 3716, in lxml.etree.parse
+  File "src/lxml/parser.pxi", line 2044, in lxml.etree._parseDocument
+  File "src/lxml/parser.pxi", line 2070, in lxml.etree._parseDocumentFromURL
+  File "src/lxml/parser.pxi", line 1961, in lxml.etree._parseDocFromFile
+  File "src/lxml/parser.pxi", line 1230, in lxml.etree._BaseParser._parseDocFromFile
+  File "src/lxml/parser.pxi", line 647, in lxml.etree._ParserContext._handleParseResultDoc
+  File "src/lxml/parser.pxi", line 765, in lxml.etree._handleParseResult
+  File "src/lxml/parser.pxi", line 689, in lxml.etree._raiseParseError
+  File "data/dats/nes.dat", line 2
+lxml.etree.XMLSyntaxError: Start tag expected, '<' not found, line 2, column 1
 
 ERROR:    Application startup failed. Exiting.
-pi@KickPi-Desktop:~/MiSTerContentManager$ 
