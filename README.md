@@ -5,7 +5,7 @@ sudo chmod -R 777 MiSTerContentManager
 
 cd MiSTerContentManager
 
-./sudo install.sh
+sudo ./install.sh
 
 🌐 Nutzung
 
