@@ -1,0 +1,18 @@
+mister-manager/
+├── app/
+│   ├── main.py
+│   ├── scanner.py
+│   ├── dat_parser.py
+│   ├── matcher.py
+│   ├── database.py
+│   ├── mgl.py
+│   └── config.py
+├── data/
+│   ├── db.sqlite
+│   └── dats/
+│       ├── snes.dat
+│       ├── nes.dat
+├── output/
+│   └── mgl/
+├── requirements.txt
+└── run.sh
