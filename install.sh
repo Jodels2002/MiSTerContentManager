@@ -3,7 +3,7 @@ set -e
 
 APP_NAME="MiSTerContentManager"
 INSTALL_DIR="/opt/$APP_NAME"
-REPO_URL="https://github.com/Jodels2002/MiSTerContentManager"  
+REPO_URL="https://github.com/Jodels2002/MiSTerContentManager.git"  
 CONFIG_FILE="$INSTALL_DIR/app/config.py"
 
 export DEBIAN_FRONTEND=noninteractive
