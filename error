@@ -1,0 +1,29 @@
+pi@KickPi-Desktop:~/MiSTerContentManager$ mister-manager
+INFO:     Started server process [3894]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "/opt/mister-manager/venv/lib/python3.13/site-packages/starlette/routing.py", line 638, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/opt/mister-manager/venv/lib/python3.13/site-packages/fastapi/routing.py", line 241, in __aenter__
+    await self._router._startup()
+  File "/opt/mister-manager/venv/lib/python3.13/site-packages/fastapi/routing.py", line 4886, in _startup
+    handler()
+    ~~~~~~~^^
+  File "/opt/mister-manager/app/main.py", line 22, in startup
+    init_db()
+    ~~~~~~~^^
+  File "/opt/mister-manager/app/database.py", line 8, in init_db
+    cur.execute("""
+    ~~~~~~~~~~~^^^^
+    CREATE TABLE IF NOT EXISTS games (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+    """)
+    ^^^^
+sqlite3.OperationalError: attempt to write a readonly database
+
+ERROR:    Application startup failed. Exiting.
+pi@KickPi-Desktop:~/MiSTerContentManager$ 
