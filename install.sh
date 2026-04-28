@@ -79,7 +79,7 @@ mkdir -p output/covers
 # 📂 ROM Pfad Auswahl (whiptail)
 # =========================
 
-DEFAULT_PATH="/media/fat/games"
+DEFAULT_PATH="/media/pi/MiSTer_Data/games/"
 
 ROM_PATH=$(whiptail --title "MiSTer ROM Pfad" \
   --inputbox "Bitte Pfad zum 'games' Ordner eingeben:" \
