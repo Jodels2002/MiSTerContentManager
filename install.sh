@@ -64,8 +64,8 @@ source venv/bin/activate
 echo "⬆️ Upgrade pip..."
 pip install --upgrade pip wheel setuptools
 
-echo "📦 Installiere Python Pakete..."
-pip install -r requirements.txt
+echo "📦 Installiere Python Dependencies..."
+pip install fastapi uvicorn lxml
 
 # =========================
 # 📂 Runtime Ordner
