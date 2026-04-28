@@ -133,7 +133,7 @@ exec uvicorn app.main:app --host 0.0.0.0 --port 8000
 EOF
 
 chmod +x /usr/local/bin/mister-manager
-chmod +x /opt/mister-manager
+sudo chmod -R 777 /opt/mister-manager
 
 # =========================
 # ✅ Fertig
