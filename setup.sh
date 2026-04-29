@@ -147,32 +147,76 @@ mkdir -p templates
 cat > templates/index.html <<'EOF'
 
 <!DOCTYPE html>
-
 <html>
 <head>
-    <title>MiSTer Web UI</title>
+    <title>MiSTer Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        body { font-family: Arial; background:#111; color:#eee; padding:20px; }
-        h1 { color:#0af; }
-        .game { padding:12px; margin:10px 0; background:#222; border-radius:10px; }
-        a { color:#0af; text-decoration:none; }
-        .btn { display:inline-block; margin-top:5px; padding:6px 10px; background:#0af; color:white; border-radius:5px; }
+        body {
+            font-family: Arial;
+            background: #111;
+            color: #eee;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #0af;
+        }
+
+        canvas {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background: #0af;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
 
-<h1>🎮 MiSTer Web UI</h1>
+<h1>🎮 MiSTer Game Distribution</h1>
 
-<p><a class="btn" href="/reboot">Reboot</a></p>
+<canvas id="chart"></canvas>
 
-{% for game in games %}
+<br>
+<a class="btn" href="/reboot">Reboot</a>
 
-<div class="game">
-    <div>{{ game }}</div>
-    <a class="btn" href="/start/{{ game }}">▶️ Start</a>
-</div>
-{% endfor %}
+<script>
+const stats = JSON.parse('{{ stats | safe }}');
+
+const labels = Object.keys(stats);
+const values = Object.values(stats);
+
+new Chart(document.getElementById('chart'), {
+    type: 'doughnut',
+    data: {
+        labels: labels,
+        datasets: [{
+            data: values
+        }]
+    },
+    options: {
+        plugins: {
+            legend: {
+                labels: {
+                    color: 'white'
+                }
+            }
+        }
+    }
+});
+</script>
 
 </body>
 </html>
