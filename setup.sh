@@ -81,6 +81,7 @@ echo "[5/8] Web App erstellen..."
 cat > app.py <<EOF
 from flask import Flask, render_template, redirect
 import paramiko
+import json
 
 app = Flask(__name__)
 
@@ -95,24 +96,37 @@ def ssh_cmd(cmd):
     ssh.close()
     return result
 
-def list_games():
+# -----------------------------
+# SPIELE STATISTIK (NEU)
+# -----------------------------
+def get_game_stats():
     try:
-        output = ssh_cmd("find /media/fat/games -type f")
-        lines = output.split("\n")
-        return [l for l in lines if l]
-    except:
-        return ["Fehler beim Laden der Spieleliste"]
+        output = ssh_cmd("ls -1 /media/fat/games")
+        systems = [x for x in output.split("\n") if x.strip()]
 
+        data = {}
+
+        for sys in systems:
+            count = ssh_cmd(f"find /media/fat/games/{sys} -type f | wc -l")
+            try:
+                data[sys] = int(count.strip())
+            except:
+                data[sys] = 0
+
+        return data
+
+    except:
+        return {"Error": 1}
+
+# -----------------------------
+# DASHBOARD
+# -----------------------------
 @app.route("/")
 def index():
-    games = list_games()
-    return render_template("index.html", games=games)
+    stats = get_game_stats()
+    return render_template("index.html", stats=json.dumps(stats))
 
-@app.route("/start/<path:game>")
-def start(game):
-    ssh_cmd(f'/media/fat/Scripts/run_game.sh "{game}"')
-    return redirect("/")
-
+# -----------------------------
 @app.route("/reboot")
 def reboot():
     ssh_cmd("reboot")
