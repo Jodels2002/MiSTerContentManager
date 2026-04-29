@@ -68,7 +68,7 @@ cat > app.py <<EOF
 from flask import Flask, render_template, redirect
 import paramiko
 
-app = Flask(**name**)
+app = Flask(__name__)
 
 MISTER_IP = "$MISTER_IP"
 
