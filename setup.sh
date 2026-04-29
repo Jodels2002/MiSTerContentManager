@@ -1,8 +1,7 @@
 #!/bin/bash
+set -euo pipefail
 
-set -e
-
-echo "=== MiSTer Web UI Installation startet ==="
+echo "=== MiSTer Web UI CLEAN INSTALL ==="
 
 # -----------------------------
 
@@ -13,6 +12,21 @@ echo "=== MiSTer Web UI Installation startet ==="
 MISTER_IP="192.168.178.140"
 PI_USER=$(whoami)
 INSTALL_DIR="/opt/mister-web"
+SERVICE_NAME="mister-web"
+
+# -----------------------------
+
+# STOP & REMOVE OLD INSTALL
+
+# -----------------------------
+
+echo "[0/8] Alte Installation entfernen (falls vorhanden)..."
+
+sudo systemctl stop $SERVICE_NAME 2>/dev/null || true
+sudo systemctl disable $SERVICE_NAME 2>/dev/null || true
+sudo rm -f /etc/systemd/system/$SERVICE_NAME.service
+
+sudo rm -rf $INSTALL_DIR
 
 # -----------------------------
 
@@ -20,36 +34,36 @@ INSTALL_DIR="/opt/mister-web"
 
 # -----------------------------
 
-echo "[1/7] System Update..."
+echo "[1/8] System Update..."
 sudo apt update && sudo apt upgrade -y
 
 # -----------------------------
 
-# BASIS PAKETE
+# PACKAGES
 
 # -----------------------------
 
-echo "[2/7] Installiere Pakete..."
+echo "[2/8] Installiere Pakete..."
 sudo apt install -y python3 python3-venv python3-pip git
 
 # -----------------------------
 
-# INSTALLATIONSVERZEICHNIS
+# INSTALL DIR
 
 # -----------------------------
 
-echo "[3/7] Verzeichnis vorbereiten..."
+echo "[3/8] Installationsverzeichnis..."
 sudo mkdir -p $INSTALL_DIR
 sudo chown $PI_USER:$PI_USER $INSTALL_DIR
 cd $INSTALL_DIR
 
 # -----------------------------
 
-# PYTHON VENV
+# PYTHON ENV
 
 # -----------------------------
 
-echo "[4/7] Python Umgebung..."
+echo "[4/8] Python venv..."
 python3 -m venv venv
 source venv/bin/activate
 
@@ -58,17 +72,17 @@ pip install flask paramiko
 
 # -----------------------------
 
-# APP ERSTELLEN
+# APP
 
 # -----------------------------
 
-echo "[5/7] Web App erstellen..."
+echo "[5/8] Web App erstellen..."
 
 cat > app.py <<EOF
 from flask import Flask, render_template, redirect
 import paramiko
 
-app = Flask(__name__)
+app = Flask(**name**)
 
 MISTER_IP = "$MISTER_IP"
 
@@ -77,17 +91,16 @@ ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect(MISTER_IP, username="root", password="1")
 stdin, stdout, stderr = ssh.exec_command(cmd)
-result = stdout.read().decode()
+out = stdout.read().decode()
 ssh.close()
-return result
+return out
 
 def list_games():
 try:
 output = ssh_cmd("find /media/fat/games -type f")
-lines = output.split("\n")
-return [l for l in lines if l]
-except:
-return ["Fehler beim Laden der Spieleliste"]
+return [g for g in output.split("\n") if g.strip()]
+except Exception as e:
+return [f"Fehler: {e}"]
 
 @app.route("/")
 def index():
@@ -104,19 +117,19 @@ def reboot():
 ssh_cmd("reboot")
 return "MiSTer rebooting..."
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+if **name** == "**main**":
+app.run(host="0.0.0.0", port=8000)
 EOF
 
 # -----------------------------
 
-# HTML TEMPLATE
+# TEMPLATE
 
 # -----------------------------
 
 mkdir -p templates
 
-cat > templates/index.html << 'EOF'
+cat > templates/index.html <<'EOF'
 
 <!DOCTYPE html>
 
@@ -125,44 +138,24 @@ cat > templates/index.html << 'EOF'
     <title>MiSTer Web UI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
-            font-family: Arial;
-            background: #111;
-            color: #eee;
-            padding: 20px;
-        }
-        h1 { color: #0af; }
-        .game {
-            padding: 12px;
-            margin: 10px 0;
-            background: #222;
-            border-radius: 10px;
-        }
-        a {
-            color: #0af;
-            text-decoration: none;
-        }
-        .btn {
-            display: inline-block;
-            margin-top: 5px;
-            padding: 6px 10px;
-            background: #0af;
-            color: white;
-            border-radius: 5px;
-        }
+        body { font-family: Arial; background:#111; color:#eee; padding:20px; }
+        h1 { color:#0af; }
+        .game { padding:12px; margin:10px 0; background:#222; border-radius:10px; }
+        a { color:#0af; text-decoration:none; }
+        .btn { display:inline-block; margin-top:5px; padding:6px 10px; background:#0af; color:white; border-radius:5px; }
     </style>
 </head>
 <body>
 
 <h1>🎮 MiSTer Web UI</h1>
 
-<p><a href="/reboot" class="btn">Reboot</a></p>
+<p><a class="btn" href="/reboot">Reboot</a></p>
 
 {% for game in games %}
 
 <div class="game">
     <div>{{ game }}</div>
-    <a href="/start/{{ game }}" class="btn">▶️ Start</a>
+    <a class="btn" href="/start/{{ game }}">▶️ Start</a>
 </div>
 {% endfor %}
 
@@ -176,9 +169,9 @@ EOF
 
 # -----------------------------
 
-echo "[6/7] Service einrichten..."
+echo "[6/8] systemd Service..."
 
-sudo bash -c "cat > /etc/systemd/system/mister-web.service <<EOL
+sudo bash -c "cat > /etc/systemd/system/$SERVICE_NAME.service <<EOL
 [Unit]
 Description=MiSTer Web UI
 After=network.target
@@ -194,27 +187,25 @@ WantedBy=multi-user.target
 EOL"
 
 sudo systemctl daemon-reload
-sudo systemctl enable mister-web
-sudo systemctl restart mister-web
+sudo systemctl enable $SERVICE_NAME
+sudo systemctl start $SERVICE_NAME
 
 # -----------------------------
 
-# FERTIG
+# DONE
 
 # -----------------------------
 
-echo "[7/7] Fertig!"
+echo "[7/8] Fertig!"
+
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
 echo ""
 echo "=== Zugriff ==="
-echo "Web UI:  http://$IP_ADDR:8000"
+echo "http://$IP_ADDR:8000"
 echo ""
-echo "Hinweis:"
-echo "- SSH auf dem MiSTer aktivieren"
-echo "- Login: root / 1"
+echo "MiSTer IP: $MISTER_IP"
 echo ""
-echo "Optional:"
-echo "nano /media/fat/Scripts/run_game.sh"
+echo "Login MiSTer: root / 1"
 echo ""
-echo "Fertig 🚀"
+echo "🚀 Installation abgeschlossen"
