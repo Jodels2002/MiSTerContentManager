@@ -82,43 +82,44 @@ cat > app.py <<EOF
 from flask import Flask, render_template, redirect
 import paramiko
 
-app = Flask(**name**)
+app = Flask(__name__)
 
-MISTER_IP = "$MISTER_IP"
+MISTER_IP = "192.168.178.140"
 
 def ssh_cmd(cmd):
-ssh = paramiko.SSHClient()
-ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(MISTER_IP, username="root", password="1")
-stdin, stdout, stderr = ssh.exec_command(cmd)
-out = stdout.read().decode()
-ssh.close()
-return out
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(MISTER_IP, username="root", password="1")
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    result = stdout.read().decode()
+    ssh.close()
+    return result
 
 def list_games():
-try:
-output = ssh_cmd("find /media/fat/games -type f")
-return [g for g in output.split("\n") if g.strip()]
-except Exception as e:
-return [f"Fehler: {e}"]
+    try:
+        output = ssh_cmd("find /media/fat/games -type f")
+        lines = output.split("\n")
+        return [l for l in lines if l]
+    except:
+        return ["Fehler beim Laden der Spieleliste"]
 
 @app.route("/")
 def index():
-games = list_games()
-return render_template("index.html", games=games)
+    games = list_games()
+    return render_template("index.html", games=games)
 
-@app.route("/start/[path:game](path:game)")
+@app.route("/start/<path:game>")
 def start(game):
-ssh_cmd(f'/media/fat/Scripts/run_game.sh "{game}"')
-return redirect("/")
+    ssh_cmd(f'/media/fat/Scripts/run_game.sh "{game}"')
+    return redirect("/")
 
 @app.route("/reboot")
 def reboot():
-ssh_cmd("reboot")
-return "MiSTer rebooting..."
+    ssh_cmd("reboot")
+    return "MiSTer rebooting..."
 
-if **name** == "**main**":
-app.run(host="0.0.0.0", port=8000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000)
 EOF
 
 # -----------------------------
